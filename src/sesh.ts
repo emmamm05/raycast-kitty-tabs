@@ -36,6 +36,6 @@ export function connectToSession(session: Session): Promise<void> {
   });
 }
 
-export function isTmuxRunning(): Promise<boolean> {
-  return new Promise<boolean>((resolve) => resolve(true));
+export async function isTmuxRunning(): Promise<boolean> {
+  return true;
 }

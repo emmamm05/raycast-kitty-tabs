@@ -22,11 +22,6 @@ function getIcon(session: Session) {
         tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
         tooltip: session.Attached >= 1 ? "Attached" : "Detached",
       };
-    case "config":
-      return {
-        source: Icon.Cog,
-        tintColor: Color.SecondaryText,
-      };
     case "zoxide":
     default:
       return {
@@ -44,9 +39,8 @@ function formatScore(score: number) {
 export default function ConnectCommand() {
   const [sessions, setSessions] = useState<{
     kitty: Array<Session>;
-    config: Array<Session>;
     zoxide: Array<Session>;
-  }>({ kitty: [], config: [], zoxide: [] });
+  }>({ kitty: [], zoxide: [] });
   const [isLoading, setIsLoading] = useState(true);
 
   async function getAndSetSessions() {
@@ -54,7 +48,6 @@ export default function ConnectCommand() {
       const sessions = await getSessions();
       setSessions({
         kitty: sessions.filter((s) => s.Src === "kitty"),
-        config: sessions.filter((s) => s.Src === "config"),
         zoxide: sessions.filter((s) => s.Src === "zoxide"),
       });
     } catch (error) {
@@ -116,22 +109,6 @@ export default function ConnectCommand() {
                 tooltip: session.Windows === 1 ? "Window" : "Windows",
               },
             ]}
-            actions={
-              <ActionPanel>
-                <Action title="Connect to Session" onAction={() => connect(session)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-
-      <List.Section title="config">
-        {sessions.config.map((session, index) => (
-          <List.Item
-            key={index}
-            title={session.Name}
-            icon={getIcon(session)}
-            accessories={[{ text: formatScore(session.Score), icon: Icon.Racket, tooltip: "Score" }]}
             actions={
               <ActionPanel>
                 <Action title="Connect to Session" onAction={() => connect(session)} />
