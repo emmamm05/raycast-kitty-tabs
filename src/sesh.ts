@@ -12,7 +12,7 @@ export interface Session {
   Name: string; // The display name
   Path: string; // The absolute directory path
   Score: number; // The score of the session (from Zoxide)
-  Attached: number; // Whether the session is currently attached
+  Focused: boolean; // If tab is active
   Windows: number; // The number of winaows in the session
   Socket: string;
 }
@@ -26,17 +26,16 @@ export function getSessions() {
       if (line.length == 0)
         return;
 
-      const [score, path] = line.match(/^\s*(\S*)\s+(.*)$/)
-      console.log('line', [score, path, line])
+      const [_, score, path] = line.match(/^\s*([0-9\.]+)\s+(.*)$/)
       const spath = path.replace(homedir(), '~')
       zoxide_hash[spath] = {
-        Attached: false,
         Score: parseFloat(score),
         Src: 'zoxide',
         Windows: 0,
         Name: spath,
         Path: spath,
-        Socket: kitty_socket
+        Socket: kitty_socket,
+        Focused: false
       }
     })
 
@@ -46,13 +45,14 @@ export function getSessions() {
     kitty_json.forEach(os_element => {
       os_element.tabs.forEach(tab => {
         kitty_hash[tab.title] = {
-          Attached: true,
+          Focused: tab.is_focused,
           Score: 0.0,
           Windows: tab.windows.length,
           Src: 'kitty',
           Name: tab.title,
           Path: tab.title,
-          Socket: kitty_socket
+          Socket: kitty_socket,
+          Id: tab.id,
         }
       });
     });
@@ -60,13 +60,14 @@ export function getSessions() {
     // All paths and kitty tab titles without repetitions.
     const sessions_obj = mergeWith(zoxide_hash, kitty_hash, (objValue, srcValue) => {
       return {
-        Attached: srcValue.Attached,
+        Focused: srcValue.Focused,
         Score: objValue.Score,
         Windows: objValue.Windows,
         Src: 'kitty',
         Name: srcValue.Name,
         Path: srcValue.Path,
         Socket: kitty_hash,
+        Id: srcValue.Id,
       }
     });
     const sessions = Object.values(sessions_obj).sort((a, b) => a.Src - b.Src);
@@ -78,7 +79,8 @@ export function getSessions() {
 export function connectToSession(session: Session): Promise<void> {
   return new Promise<void>( async (resolve, reject) => {
     try {
-      await asyncExec(`kitty @ --to unix:${session.Socket} focus-tab --match=env:PWD=^${session.Path.replace('~', homedir())}$`, { env });
+      const query = session.Id ? `id:${session.Id}` : `title:"^${session.Path}$"`
+      await asyncExec(`kitty @ --to unix:${session.Socket} focus-tab --match ${query}`, { env });
     } catch (error) {
       if (!error.message.match(/No matching tabs/)) {
         console.log('focusTab', error);

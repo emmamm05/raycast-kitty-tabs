@@ -19,8 +19,8 @@ function getIcon(session: Session) {
     case "kitty":
       return {
         source: Icon.Bolt,
-        tintColor: session.Attached >= 1 ? Color.Green : Color.Blue,
-        tooltip: session.Attached >= 1 ? "Attached" : "Detached",
+        tintColor: session.Focused >= 1 ? Color.Blue : Color.Green,
+        tooltip: session.Focused >= 1 ? "Focused" : "Not Focused",
       };
     case "zoxide":
     default:
