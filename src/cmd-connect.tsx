@@ -92,7 +92,6 @@ export default function ConnectCommand() {
       });
     } finally {
       setIsLoading(false);
-      console.log('reloading')
     }
   }
 
