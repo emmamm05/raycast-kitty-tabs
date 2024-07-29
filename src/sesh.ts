@@ -26,7 +26,8 @@ export function getSessions() {
       if (line.length == 0)
         return;
 
-      const [_, score, path] = line.split(/\s+/);
+      const [score, path] = line.match(/^\s*(\S*)\s+(.*)$/)
+      console.log('line', [score, path, line])
       const spath = path.replace(homedir(), '~')
       zoxide_hash[spath] = {
         Attached: false,
