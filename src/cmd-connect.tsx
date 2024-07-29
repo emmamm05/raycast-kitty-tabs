@@ -83,6 +83,7 @@ export default function ConnectCommand() {
       await openApp();
       await closeMainWindow();
       await clearSearchBar();
+      await getAndSetSessions();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -91,6 +92,7 @@ export default function ConnectCommand() {
       });
     } finally {
       setIsLoading(false);
+      console.log('reloading')
     }
   }
 
